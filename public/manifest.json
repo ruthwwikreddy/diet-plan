@@ -1,0 +1,20 @@
+{
+  "short_name": "Diet Plan Maker",
+  "name": "Gym Diet Plan Maker",
+  "icons": [
+    {
+      "src": "/assets/images/Muscle-Works-Logo-e1727793657966.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/Muscle-Works-Logo-e1727793657966.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#e11d48",
+  "background_color": "#ffffff"
+}
