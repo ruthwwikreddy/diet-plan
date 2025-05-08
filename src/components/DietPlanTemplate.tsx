@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type DietPlanProps = {
   initialDietPlan: {
@@ -25,6 +26,7 @@ type DietPlanProps = {
 const DietPlanTemplate: React.FC<DietPlanProps> = ({ initialDietPlan, onSave }) => {
   const [dietPlan, setDietPlan] = useState(initialDietPlan);
   const [isEditing, setIsEditing] = useState(true);
+  const isMobile = useIsMobile();
 
   const handleInputChange = (mealType: string, field: string, value: string) => {
     setDietPlan(prev => {
@@ -70,7 +72,7 @@ const DietPlanTemplate: React.FC<DietPlanProps> = ({ initialDietPlan, onSave }) 
   };
 
   return (
-    <div className="bg-white max-w-4xl mx-auto font-[Montserrat]">
+    <div className="bg-white max-w-4xl mx-auto font-[Montserrat] px-2 md:px-6">
       {/* Logo Header */}
       <div className="flex items-center justify-between mb-4">
         <div></div> {/* Empty div for spacing */}
@@ -91,16 +93,16 @@ const DietPlanTemplate: React.FC<DietPlanProps> = ({ initialDietPlan, onSave }) 
       </div>
 
       {/* Nutrition Table */}
-      <div className="mb-8">
-        <table className="w-full nutrition-table border-collapse">
+      <div className="mb-8 overflow-x-auto -mx-6 md:mx-0">
+        <table className="w-full nutrition-table border-collapse min-w-[800px] md:min-w-0">
           <thead>
             <tr>
-              <th className="w-1/6">Meal</th>
-              <th className="w-1/6">Quantity</th>
-              <th className="w-1/6">Protein</th>
-              <th className="w-1/6">Carbo-hydrates</th>
-              <th className="w-1/6">Fats</th>
-              <th className="w-1/6">Calories</th>
+              <th className="w-1/6 text-xs md:text-sm">Meal</th>
+              <th className="w-1/6 text-xs md:text-sm">Quantity</th>
+              <th className="w-1/6 text-xs md:text-sm">Protein</th>
+              <th className="w-1/6 text-xs md:text-sm">{isMobile ? "Carbs" : "Carbo-hydrates"}</th>
+              <th className="w-1/6 text-xs md:text-sm">Fats</th>
+              <th className="w-1/6 text-xs md:text-sm">Calories</th>
             </tr>
           </thead>
           <tbody>
@@ -229,7 +231,7 @@ const DietPlanTemplate: React.FC<DietPlanProps> = ({ initialDietPlan, onSave }) 
 
       {/* Important Tips Section */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-muscle-gray mb-4">Important tips:</h2>
+        <h2 className="text-lg md:text-xl font-bold text-muscle-gray mb-4">Important tips:</h2>
         
         <div className="flex items-start mb-4">
           <div className="bg-muscle-gray text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">
@@ -273,7 +275,7 @@ const DietPlanTemplate: React.FC<DietPlanProps> = ({ initialDietPlan, onSave }) 
 
       {/* Mixed Salads Section */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-muscle-gray mb-4">MIXED SALADS:</h2>
+        <h2 className="text-lg md:text-xl font-bold text-muscle-gray mb-4">MIXED SALADS:</h2>
         <ul className="list-disc pl-6 space-y-2">
           <li>Must Add One Medium Tomato & Onion.</li>
           <li>Half Cucumber + Capsicum or any other Low Carbohydrate Vegetable as mentioned above in tips column + Add Pepper, Salt and Squeeze a lemon for taste.</li>
@@ -283,7 +285,7 @@ const DietPlanTemplate: React.FC<DietPlanProps> = ({ initialDietPlan, onSave }) 
 
       {/* Food for Brain Section */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-muscle-gray mb-4">FOOD FOR BRAIN & STRONG BONES:</h2>
+        <h2 className="text-lg md:text-xl font-bold text-muscle-gray mb-4">FOOD FOR BRAIN & STRONG BONES:</h2>
         <ul className="list-disc pl-6 space-y-2">
           <li>Eggs (protein + yolk with choline for memory development)</li>
           <li>Spinach (for new brain cells growth)</li>

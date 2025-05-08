@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import DietPlanTemplate from './DietPlanTemplate';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from '@/components/ui/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useSwipe } from '@/hooks/use-swipe';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const defaultDietPlan = {
   traineeName: 'John Doe',
@@ -37,6 +40,23 @@ const EditableDietPlan: React.FC = () => {
   const [showFullPreview, setShowFullPreview] = useState(false);
   const [traineeName, setTraineeName] = useState(defaultDietPlan.traineeName);
   const [isSaved, setIsSaved] = useState(false);
+  const [activeMealIndex, setActiveMealIndex] = useState(0);
+  const isMobile = useIsMobile();
+  const mealCardRef = useRef<HTMLDivElement>(null);
+  
+  // Set up swipe handlers for mobile navigation
+  useSwipe(mealCardRef, {
+    onSwipeLeft: () => {
+      if (activeMealIndex < mealOrder.length - 1) {
+        setActiveMealIndex(activeMealIndex + 1);
+      }
+    },
+    onSwipeRight: () => {
+      if (activeMealIndex > 0) {
+        setActiveMealIndex(activeMealIndex - 1);
+      }
+    }
+  }, { threshold: 30 });
   
   // Auto-calculate totals whenever any nutritional value changes
   useEffect(() => {
@@ -92,11 +112,91 @@ const EditableDietPlan: React.FC = () => {
       duration: 3000,
     });
   };
+  
+  // Render a meal card for mobile view
+  const renderMobileCard = (mealKey: string) => {
+    const meal = mealOrder.find(m => m.key === mealKey);
+    if (!meal) return null;
+    
+    return (
+      <Card key={meal.key} className="border border-gray-200 shadow-sm">
+        <CardHeader className="p-3 pb-0">
+          <CardTitle className="text-base">{meal.label}</CardTitle>
+          <CardDescription className="text-xs">{meal.description}</CardDescription>
+        </CardHeader>
+        <CardContent className="p-3 pt-0 space-y-2">
+          <div>
+            <Label htmlFor={`${meal.key}-name`} className="text-xs font-medium">Food Item</Label>
+            <Input
+              id={`${meal.key}-name`}
+              value={meal.key === 'earlyMorning' ? 'Empty stomach' : dietPlan.meals[meal.key].name}
+              onChange={(e) => handleInputChange(meal.key, 'name', e.target.value)}
+              className="mt-1 text-sm"
+              disabled={meal.key === 'earlyMorning'}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label htmlFor={`${meal.key}-quantity`} className="text-xs font-medium">Quantity</Label>
+              <Input
+                id={`${meal.key}-quantity`}
+                value={dietPlan.meals[meal.key].quantity}
+                onChange={(e) => handleInputChange(meal.key, 'quantity', e.target.value)}
+                className="mt-1 text-sm"
+              />
+            </div>
+            <div>
+              <Label htmlFor={`${meal.key}-protein`} className="text-xs font-medium">Protein (g)</Label>
+              <Input
+                id={`${meal.key}-protein`}
+                type="number"
+                value={dietPlan.meals[meal.key].protein}
+                onChange={(e) => handleInputChange(meal.key, 'protein', e.target.value)}
+                className="mt-1 text-sm"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <Label htmlFor={`${meal.key}-carbs`} className="text-xs font-medium">Carbs (g)</Label>
+              <Input
+                id={`${meal.key}-carbs`}
+                type="number"
+                value={dietPlan.meals[meal.key].carbs}
+                onChange={(e) => handleInputChange(meal.key, 'carbs', e.target.value)}
+                className="mt-1 text-sm"
+              />
+            </div>
+            <div>
+              <Label htmlFor={`${meal.key}-fats`} className="text-xs font-medium">Fats (g)</Label>
+              <Input
+                id={`${meal.key}-fats`}
+                type="number"
+                value={dietPlan.meals[meal.key].fats}
+                onChange={(e) => handleInputChange(meal.key, 'fats', e.target.value)}
+                className="mt-1 text-sm"
+              />
+            </div>
+            <div>
+              <Label htmlFor={`${meal.key}-calories`} className="text-xs font-medium">Calories</Label>
+              <Input
+                id={`${meal.key}-calories`}
+                type="number"
+                value={dietPlan.meals[meal.key].calories}
+                onChange={(e) => handleInputChange(meal.key, 'calories', e.target.value)}
+                className="mt-1 text-sm"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
-    <Card className="w-full bg-white shadow-lg border-0">
-      <CardHeader className="bg-gradient-to-r from-muscle-red/90 to-muscle-red text-white">
-        <CardTitle className="text-2xl font-bold flex items-center justify-between">
+    <Card className="w-full bg-white shadow-lg border-0 max-w-[100vw] overflow-hidden rounded-lg md:rounded-xl">
+      <CardHeader className="bg-gradient-to-r from-muscle-red/90 to-muscle-red text-white p-4 md:p-6">
+        <CardTitle className="text-xl md:text-2xl font-bold flex items-center justify-between">
           <span>Diet Plan Builder</span>
           <div className="flex gap-2">
             <TooltipProvider>
@@ -152,8 +252,54 @@ const EditableDietPlan: React.FC = () => {
               />
             </div>
             
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
+            {isMobile ? (
+              // Mobile card-based layout
+              <div className="space-y-4 px-1" ref={mealCardRef}>
+                <div className="flex justify-between items-center mb-2 px-1">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setActiveMealIndex(Math.max(0, activeMealIndex - 1))}
+                    disabled={activeMealIndex === 0}
+                    className="text-muscle-red hover:text-muscle-red/80 p-2"
+                  >
+                    <ChevronLeft size={20} />
+                    <span className="sr-only">Previous</span>
+                  </Button>
+                  <span className="font-medium text-sm">
+                    Meal {activeMealIndex + 1} of {mealOrder.length}
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setActiveMealIndex(Math.min(mealOrder.length - 1, activeMealIndex + 1))}
+                    disabled={activeMealIndex === mealOrder.length - 1}
+                    className="text-muscle-red hover:text-muscle-red/80 p-2"
+                  >
+                    <ChevronRight size={20} />
+                    <span className="sr-only">Next</span>
+                  </Button>
+                </div>
+                {renderMobileCard(mealOrder[activeMealIndex].key)}
+
+                <Card className="border border-gray-200 bg-muscle-red/5 shadow-sm sticky bottom-0 mt-6">
+                  <CardContent className="p-3">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-bold text-muscle-red">Daily Totals</h3>
+                      <div className="grid grid-cols-2 gap-x-4 text-sm">
+                        <div className="text-right">Protein: <span className="font-bold">{dietPlan.totals.protein}g</span></div>
+                        <div className="text-right">Carbs: <span className="font-bold">{dietPlan.totals.carbs}g</span></div>
+                        <div className="text-right">Fats: <span className="font-bold">{dietPlan.totals.fats}g</span></div>
+                        <div className="text-right">Calories: <span className="font-bold">{dietPlan.totals.calories}</span></div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              // Desktop table layout
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse min-w-[700px] md:min-w-0">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
                     <th className="p-3 text-left text-sm font-semibold text-gray-600">Meal</th>
@@ -230,24 +376,25 @@ const EditableDietPlan: React.FC = () => {
                     <td className="p-3 text-center font-bold">{dietPlan.totals.calories} kcal</td>
                   </tr>
                 </tbody>
-              </table>
-            </div>
+                </table>
+              </div>
+            )}
             
             <div className="mt-6 flex justify-between items-center">
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 hidden md:block">
                 {isSaved ? "✓ All changes saved" : "Unsaved changes"}
               </div>
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setActiveTab('preview')}>
+                <Button variant="outline" onClick={() => setActiveTab('preview')} className="w-full md:w-auto">
                   Preview Plan
                 </Button>
                 <Dialog open={showFullPreview} onOpenChange={setShowFullPreview}>
                   <DialogTrigger asChild>
-                    <Button variant="outline">
-                      Full Screen Preview
+                    <Button variant="outline" className="w-full md:w-auto">
+                      {isMobile ? "Full Preview" : "Full Screen Preview"}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
+                  <DialogContent className="max-w-[95vw] md:max-w-4xl h-[90vh] md:h-auto">
                     <DialogHeader>
                       <DialogTitle>Diet Plan Preview</DialogTitle>
                       <DialogDescription>
@@ -263,8 +410,8 @@ const EditableDietPlan: React.FC = () => {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
-                <Button onClick={handleSave} className="bg-muscle-red hover:bg-red-700">
-                  Save Plan
+                <Button onClick={handleSave} className="bg-muscle-red hover:bg-red-700 w-full md:w-auto">
+                  {isMobile ? "Save" : "Save Plan"}
                 </Button>
               </div>
             </div>
@@ -272,13 +419,13 @@ const EditableDietPlan: React.FC = () => {
           
           <TabsContent value="preview" className="p-0 focus-visible:outline-none focus-visible:ring-0">
             <div className="p-6 bg-gray-50">
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                 <h3 className="text-lg font-semibold">Diet Plan Preview</h3>
-                <Button variant="outline" onClick={() => setActiveTab('edit')}>
+                <Button variant="outline" onClick={() => setActiveTab('edit')} className="w-full md:w-auto">
                   Back to Edit
                 </Button>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
                 <DietPlanTemplate initialDietPlan={dietPlan} />
               </div>
             </div>
@@ -286,16 +433,16 @@ const EditableDietPlan: React.FC = () => {
         </Tabs>
       </CardContent>
       <CardFooter className="bg-gray-50 border-t border-gray-200 p-4">
-        <div className="flex justify-between items-center w-full">
+        <div className="flex flex-col md:flex-row justify-between items-center w-full gap-4">
           <div className="text-sm text-gray-500">
             <span className="font-medium">Total Calories:</span> {dietPlan.totals.calories} kcal
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleReset}>
+          <div className="flex gap-2 w-full md:w-auto">
+            <Button variant="outline" size="sm" onClick={handleReset} className="w-1/2 md:w-auto">
               Reset
             </Button>
-            <Button size="sm" className="bg-muscle-red hover:bg-red-700" onClick={handleSave}>
-              Save Plan
+            <Button size="sm" className="bg-muscle-red hover:bg-red-700 w-1/2 md:w-auto" onClick={handleSave}>
+              {isMobile ? "Save" : "Save Plan"}
             </Button>
           </div>
         </div>

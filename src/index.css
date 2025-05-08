@@ -94,6 +94,25 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Montserrat', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+
+  /* Improve touch targets for mobile */
+  button, a, input, select, [role="button"] {
+    @apply min-h-[44px];
+  }
+
+  /* Improve form elements on mobile */
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 }
 
@@ -114,4 +133,60 @@
   background-color: #F5F5F5;
   border: 1px solid #E31B23;
   padding: 0.5rem;
+}
+
+/* Swipe animations */
+@keyframes swipeHint {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+  100% { transform: translateX(0); }
+}
+
+.swipe-hint {
+  animation: swipeHint 1.5s ease-in-out;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  html, body {
+    scroll-behavior: smooth;
+  }
+
+  /* Improve scrolling on mobile */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    padding-bottom: 0.5rem;
+  }
+
+  /* Improve touch targets for mobile */
+  .nutrition-table td,
+  .nutrition-table th {
+    padding: 0.75rem 0.5rem;
+  }
+
+  /* Better mobile form inputs */
+  input[type="number"],
+  input[type="text"] {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+
+  /* Add pull-to-refresh indicator */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(to right, transparent, #E31B23, transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 9999;
+  }
+
+  body.refreshing::before {
+    opacity: 1;
+  }
 }
