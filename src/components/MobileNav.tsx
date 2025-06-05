@@ -43,13 +43,13 @@ const MobileNav: React.FC = () => {
       <Button 
         variant="ghost" 
         size="icon" 
-        className="relative z-50 mobile-button hover:bg-muscle-red/10 active:scale-95" 
+        className="relative z-50 mobile-button hover:bg-red-100 active:scale-95" 
         onClick={toggleMenu}
         aria-label={isOpen ? "Close menu" : "Open menu"}
       >
         <div className="relative w-6 h-6">
           <span className={`absolute inset-0 transition-all duration-300 ${isOpen ? 'rotate-45' : ''}`}>
-            {isOpen ? <X size={24} className="text-muscle-red" /> : <Menu size={24} className="text-muscle-gray" />}
+            {isOpen ? <X size={24} className="text-red-600" /> : <Menu size={24} className="text-gray-700" />}
           </span>
         </div>
       </Button>
@@ -70,11 +70,15 @@ const MobileNav: React.FC = () => {
       >
         <div className="flex flex-col h-full">
           {/* Header with gradient */}
-          <div className="bg-gradient-to-r from-muscle-red to-red-600 p-6 text-white">
+          <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 text-white">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="bg-white/20 p-2 rounded-full">
-                  <Sparkles className="w-6 h-6" />
+                  <img
+                    src="/images/logo.png"
+                    alt="Gym Diet Plan Maker"
+                    className="w-6 h-6 object-contain"
+                  />
                 </div>
                 <div>
                   <h2 className="font-bold text-lg">Menu</h2>
@@ -112,7 +116,7 @@ const MobileNav: React.FC = () => {
             <nav className="flex flex-col px-4 space-y-2">
               <Button 
                 variant="ghost" 
-                className="justify-start px-4 py-4 text-left mobile-button hover:bg-muscle-red/10 hover:text-muscle-red rounded-2xl transition-all duration-200" 
+                className="justify-start px-4 py-4 text-left mobile-button hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all duration-200" 
                 onClick={() => handleNavigation('/')}
               >
                 <Home size={20} className="mr-4" />
@@ -123,7 +127,7 @@ const MobileNav: React.FC = () => {
                 <>
                   <Button 
                     variant="ghost" 
-                    className="justify-start px-4 py-4 text-left mobile-button hover:bg-muscle-red/10 hover:text-muscle-red rounded-2xl transition-all duration-200" 
+                    className="justify-start px-4 py-4 text-left mobile-button hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all duration-200" 
                     onClick={() => handleNavigation(user.role === 'trainer' ? '/dashboard' : '/trainee-dashboard')}
                   >
                     <User size={20} className="mr-4" />
@@ -133,7 +137,7 @@ const MobileNav: React.FC = () => {
                   {user.role === 'trainer' && (
                     <Button 
                       variant="ghost" 
-                      className="justify-start px-4 py-4 text-left mobile-button hover:bg-muscle-red/10 hover:text-muscle-red rounded-2xl transition-all duration-200" 
+                      className="justify-start px-4 py-4 text-left mobile-button hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all duration-200" 
                       onClick={() => handleNavigation('/create-plan')}
                     >
                       <FileText size={20} className="mr-4" />
@@ -156,7 +160,7 @@ const MobileNav: React.FC = () => {
                 <>
                   <Button 
                     variant="ghost" 
-                    className="justify-start px-4 py-4 text-left mobile-button hover:bg-muscle-red/10 hover:text-muscle-red rounded-2xl transition-all duration-200" 
+                    className="justify-start px-4 py-4 text-left mobile-button hover:bg-red-50 hover:text-red-600 rounded-2xl transition-all duration-200" 
                     onClick={() => handleNavigation('/login')}
                   >
                     <LogIn size={20} className="mr-4" />
@@ -165,7 +169,7 @@ const MobileNav: React.FC = () => {
                   
                   <div className="px-4 mt-4">
                     <Button 
-                      className="w-full bg-muscle-red hover:bg-red-700 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95" 
+                      className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95" 
                       onClick={() => handleNavigation('/register')}
                     >
                       Get Started Free
@@ -179,15 +183,10 @@ const MobileNav: React.FC = () => {
           {/* Enhanced Footer */}
           <div className="border-t border-gray-200 p-6 bg-gray-50">
             <div className="text-center">
-              <img 
-                src="/assets/images/Muscle-Works-Logo-e1727793657966.png" 
-                alt="Logo" 
-                className="h-8 w-auto mx-auto mb-3 opacity-60" 
-              />
               <p className="text-sm font-medium text-gray-700">© {new Date().getFullYear()} Gym Diet Plan Maker</p>
-              <p className="text-xs text-gray-500 mt-1">The Fitness Coliseum</p>
+              <p className="text-xs text-gray-500 mt-1">Professional Nutrition Planning</p>
               <div className="mt-3 flex justify-center">
-                <div className="bg-gradient-to-r from-muscle-red to-red-600 h-1 w-16 rounded-full"></div>
+                <div className="bg-gradient-to-r from-red-600 to-red-700 h-1 w-16 rounded-full"></div>
               </div>
             </div>
           </div>

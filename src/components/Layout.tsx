@@ -24,6 +24,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const fetchTrainerProfile = async () => {
     try {
+      // Try to get logo from localStorage first
+      const localLogo = localStorage.getItem(`trainer_logo_${user?.id}`);
+      
       const { data, error } = await supabase
         .from('trainer_profiles')
         .select('*')
@@ -35,7 +38,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       }
 
       if (data) {
-        setTrainerProfile(data);
+        // Use local logo if available, otherwise use database logo
+        const logoUrl = localLogo || data.logo_url;
+        setTrainerProfile({ ...data, logo_url: logoUrl });
+        
         // Apply custom colors to CSS variables
         if (data.primary_color) {
           document.documentElement.style.setProperty('--trainer-primary', data.primary_color);
@@ -58,71 +64,76 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const secondaryColor = trainerProfile?.secondary_color || '#4D4D4D';
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <header className="bg-white shadow-md border-b-2">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            {trainerProfile ? (
-              <div className="flex items-center gap-3">
-                {trainerProfile.logo_url ? (
-                  <img
-                    src={trainerProfile.logo_url}
-                    alt="Trainer Logo"
-                    className="h-10 w-auto object-contain"
-                  />
-                ) : (
-                  <div className="h-10 w-16 border-2 border-dashed border-gray-300 rounded flex items-center justify-center">
-                    <span className="text-xs text-gray-500">Your Logo</span>
-                  </div>
-                )}
+            {trainerProfile && trainerProfile.logo_url ? (
+              <div className="flex items-center gap-4">
+                <img
+                  src={trainerProfile.logo_url}
+                  alt="Trainer Logo"
+                  className="h-12 w-auto object-contain rounded-lg shadow-sm"
+                />
                 <div>
                   <h1 
-                    className="text-xl font-bold"
+                    className="text-2xl font-bold"
                     style={{ color: secondaryColor }}
                   >
                     {trainerProfile.gym_name || 'Gym Diet Plan Maker'}
                   </h1>
                   {trainerProfile.gym_name && (
-                    <p className="text-xs text-gray-500">Diet Plan System</p>
+                    <p className="text-sm text-gray-600 font-medium">Professional Diet Plan System</p>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-16 border-2 border-dashed border-gray-300 rounded flex items-center justify-center">
-                  <span className="text-xs text-gray-500">Your Logo</span>
+              <div className="flex items-center gap-4">
+                <img
+                  src="/images/logo.png"
+                  alt="Gym Diet Plan Maker"
+                  className="h-12 w-auto object-contain rounded-lg shadow-sm"
+                />
+                <div>
+                  <h1 className="text-2xl font-bold" style={{ color: secondaryColor }}>
+                    Gym Diet Plan Maker
+                  </h1>
+                  <p className="text-sm text-gray-600 font-medium">Professional Diet Plan System</p>
                 </div>
-                <h1 className="text-xl font-bold" style={{ color: secondaryColor }}>
-                  Gym Diet Plan Maker
-                </h1>
               </div>
             )}
           </div>
           {user && (
-            <div className="flex items-center gap-4">
-              <span className="font-medium" style={{ color: secondaryColor }}>
-                {user.role === 'trainer' ? 'Trainer' : 'Trainee'}: {user.name}
-              </span>
+            <div className="flex items-center gap-6">
+              <div className="text-right">
+                <p className="font-semibold text-lg" style={{ color: secondaryColor }}>
+                  {user.name}
+                </p>
+                <p className="text-sm text-gray-600 capitalize">
+                  {user.role === 'trainer' ? 'Professional Trainer' : 'Trainee'}
+                </p>
+              </div>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={handleLogout} 
-                className="flex items-center gap-1"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-red-50"
                 style={{ color: primaryColor }}
               >
-                <LogOut size={16} />
-                <span>Logout</span>
+                <LogOut size={18} />
+                <span className="font-medium">Logout</span>
               </Button>
             </div>
           )}
         </div>
       </header>
-      <main className="flex-1" style={{ backgroundColor: '#fafafa' }}>
+      <main className="flex-1 bg-gray-50">
         {children}
       </main>
-      <footer style={{ backgroundColor: secondaryColor }} className="text-white py-4">
-        <div className="container mx-auto px-4 text-center">
-          <p>© {new Date().getFullYear()} {trainerProfile?.gym_name || 'Gym Diet Plan Maker'}</p>
+      <footer style={{ backgroundColor: secondaryColor }} className="text-white py-6">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-lg font-medium">© {new Date().getFullYear()} {trainerProfile?.gym_name || 'Gym Diet Plan Maker'}</p>
+          <p className="text-sm opacity-80 mt-1">Professional Nutrition Planning Platform</p>
         </div>
       </footer>
     </div>

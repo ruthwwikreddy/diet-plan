@@ -1,8 +1,8 @@
 
 {
-  "name": "Gym Diet Plan Maker",
-  "short_name": "DietPlan",
-  "description": "Professional diet plans made simple for trainers and trainees",
+  "name": "Gym Diet Plan Maker - Professional Nutrition Planning",
+  "short_name": "GymDietPlan",
+  "description": "Professional diet plans made simple for trainers and trainees. Create customized nutrition plans with our advanced platform.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -10,22 +10,34 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "/icon-192.png",
+      "src": "/images/logo.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/images/logo.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["health", "fitness", "productivity"],
+  "categories": ["health", "fitness", "productivity", "lifestyle"],
   "lang": "en",
-  "dir": "ltr"
+  "dir": "ltr",
+  "scope": "/",
+  "screenshots": [
+    {
+      "src": "/images/logo.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
 }

@@ -1,6 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 type DietPlanProps = {
   initialDietPlan: {
@@ -24,9 +26,42 @@ type DietPlanProps = {
 };
 
 const DietPlanTemplate: React.FC<DietPlanProps> = ({ initialDietPlan, onSave }) => {
+  const { user } = useAuth();
   const [dietPlan, setDietPlan] = useState(initialDietPlan);
   const [isEditing, setIsEditing] = useState(true);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const isMobile = useIsMobile();
+
+  // Fetch trainer's logo
+  useEffect(() => {
+    const fetchTrainerLogo = async () => {
+      if (user?.id) {
+        // First check localStorage
+        const localLogo = localStorage.getItem(`trainer_logo_${user.id}`);
+        if (localLogo) {
+          setLogoUrl(localLogo);
+          return;
+        }
+
+        // If not in localStorage, check database
+        try {
+          const { data } = await supabase
+            .from('trainer_profiles')
+            .select('logo_url')
+            .eq('trainer_id', user.id)
+            .single();
+
+          if (data?.logo_url) {
+            setLogoUrl(data.logo_url);
+          }
+        } catch (error) {
+          console.error('Error fetching trainer logo:', error);
+        }
+      }
+    };
+
+    fetchTrainerLogo();
+  }, [user?.id]);
 
   const handleInputChange = (mealType: string, field: string, value: string) => {
     setDietPlan(prev => {
@@ -76,14 +111,27 @@ const DietPlanTemplate: React.FC<DietPlanProps> = ({ initialDietPlan, onSave }) 
       {/* Logo Header */}
       <div className="flex items-center justify-between mb-4">
         <div></div> {/* Empty div for spacing */}
-        <div className="text-center flex flex-col items-center">
-          <img 
-            src="/assets/images/Muscle-Works-Logo-e1727793657966.png" 
-            alt="Muscle Works Logo" 
-            className="h-16 mb-2" 
-          />
-          <p className="text-sm text-gray-400">The Fitness Coliseum</p>
-        </div>
+        {logoUrl ? (
+          <div className="text-center flex flex-col items-center">
+            <img 
+              src={logoUrl}
+              alt="Gym Logo" 
+              className="h-16 mb-2 object-contain"
+              onError={(e) => {
+                // If image fails to load, remove it
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  const text = document.createElement('p');
+                  text.className = 'text-sm text-gray-400';
+                  text.textContent = 'Logo not available';
+                  parent.appendChild(text);
+                }
+              }}
+            />
+          </div>
+        ) : null}
       </div>
 
       {/* Nutrition Plan Header with Red Border */}
