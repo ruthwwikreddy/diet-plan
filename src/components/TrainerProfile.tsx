@@ -28,6 +28,13 @@ const TrainerProfile = () => {
   const fetchProfile = async () => {
     try {
       console.log('Fetching profile for user:', user?.id);
+      
+      // Try to get from localStorage first
+      const localLogo = localStorage.getItem(`trainer_logo_${user?.id}`);
+      if (localLogo) {
+        setLogoUrl(localLogo);
+      }
+      
       const { data, error } = await supabase
         .from('trainer_profiles')
         .select('*')
@@ -43,9 +50,13 @@ const TrainerProfile = () => {
         console.log('Profile data found:', data);
         setGymName(data.gym_name || '');
         setTrainerName(data.trainer_name || user?.name || '');
-        setLogoUrl(data.logo_url);
         setPrimaryColor(data.primary_color || '#E31B23');
         setSecondaryColor(data.secondary_color || '#4D4D4D');
+        
+        // Use database logo if no local logo exists
+        if (!localLogo && data.logo_url) {
+          setLogoUrl(data.logo_url);
+        }
       } else {
         console.log('No profile found, using defaults');
         setTrainerName(user?.name || '');
@@ -61,7 +72,7 @@ const TrainerProfile = () => {
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
-      console.log('Starting logo upload...');
+      console.log('Starting local logo upload...');
       
       if (!event.target.files || event.target.files.length === 0) {
         console.log('No file selected');
@@ -71,9 +82,9 @@ const TrainerProfile = () => {
       const file = event.target.files[0];
       console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
 
-      // Check file size (max 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error('File size must be less than 2MB');
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB');
         return;
       }
 
@@ -83,36 +94,26 @@ const TrainerProfile = () => {
         return;
       }
 
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
-      const filePath = `logos/${fileName}`;
-
-      console.log('Uploading to path:', filePath);
-
-      // Upload file to storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('trainer-assets')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
-      }
-
-      console.log('Upload successful:', uploadData);
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('trainer-assets')
-        .getPublicUrl(filePath);
-
-      console.log('Public URL:', urlData.publicUrl);
-
-      setLogoUrl(urlData.publicUrl);
-      toast.success('Logo uploaded successfully!');
+      // Convert to base64 and store locally
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64String = e.target?.result as string;
+        
+        // Store in localStorage
+        localStorage.setItem(`trainer_logo_${user?.id}`, base64String);
+        
+        setLogoUrl(base64String);
+        toast.success('Logo uploaded and saved locally!');
+        console.log('Logo saved to localStorage');
+      };
+      
+      reader.onerror = () => {
+        toast.error('Error reading file');
+        console.error('FileReader error');
+      };
+      
+      reader.readAsDataURL(file);
+      
     } catch (error: any) {
       console.error('Error uploading logo:', error);
       toast.error(`Error uploading logo: ${error.message || 'Unknown error'}`);
@@ -158,6 +159,12 @@ const TrainerProfile = () => {
       document.documentElement.style.setProperty('--trainer-primary', primaryColor);
       document.documentElement.style.setProperty('--trainer-secondary', secondaryColor);
       
+      // Store colors in localStorage for instant loading
+      localStorage.setItem(`trainer_colors_${user?.id}`, JSON.stringify({
+        primary: primaryColor,
+        secondary: secondaryColor
+      }));
+      
       // Trigger a page refresh to update the layout
       window.location.reload();
     } catch (error: any) {
@@ -169,6 +176,12 @@ const TrainerProfile = () => {
   const resetToDefault = () => {
     setPrimaryColor('#E31B23');
     setSecondaryColor('#4D4D4D');
+  };
+
+  const removeLogo = () => {
+    setLogoUrl(null);
+    localStorage.removeItem(`trainer_logo_${user?.id}`);
+    toast.success('Logo removed');
   };
 
   if (loading) {
@@ -282,15 +295,25 @@ const TrainerProfile = () => {
           </div>
 
           <div>
-            <Label>Logo Upload</Label>
+            <Label>Logo Upload (Local Storage)</Label>
             <div className="space-y-4">
               <div className="flex items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
                 {logoUrl ? (
-                  <img
-                    src={logoUrl}
-                    alt="Trainer Logo"
-                    className="max-w-32 max-h-32 object-contain"
-                  />
+                  <div className="text-center">
+                    <img
+                      src={logoUrl}
+                      alt="Trainer Logo"
+                      className="max-w-32 max-h-32 object-contain mx-auto mb-2"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={removeLogo}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Remove Logo
+                    </Button>
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center text-gray-500">
                     <div className="w-20 h-16 border-2 border-dashed border-gray-300 rounded flex items-center justify-center mb-2">
@@ -311,7 +334,7 @@ const TrainerProfile = () => {
                     <p className="text-sm text-gray-500">
                       <span className="font-semibold">Click to upload</span> your logo
                     </p>
-                    <p className="text-xs text-gray-500">PNG, JPG or GIF (MAX. 2MB)</p>
+                    <p className="text-xs text-gray-500">PNG, JPG or GIF (MAX. 5MB) - Saved locally</p>
                   </div>
                   <input
                     id="logo-upload"
@@ -331,7 +354,7 @@ const TrainerProfile = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Uploading...
+                    Processing...
                   </div>
                 </div>
               )}

@@ -1,12 +1,14 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Users, Calendar, Download } from "lucide-react";
+import { CheckCircle, Users, Calendar, Download, Play, Sparkles } from "lucide-react";
+import DailyChecklist from "@/components/DailyChecklist";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [showDemo, setShowDemo] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -32,7 +34,7 @@ const Index = () => {
                 onClick={() => navigate("/register")}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
-                Get Started
+                Sign Up as Trainer
               </Button>
             </div>
           </div>
@@ -50,7 +52,7 @@ const Index = () => {
             Create customized diet plans for your clients with our professional platform. 
             Track progress, manage nutrition, and build your fitness business with ease.
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-4 justify-center mb-8">
             <Button 
               size="lg" 
               onClick={() => navigate("/register")}
@@ -61,13 +63,43 @@ const Index = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              onClick={() => navigate("/login")}
+              onClick={() => setShowDemo(!showDemo)}
               className="px-8 py-4 text-lg font-semibold border-2 border-gray-300 hover:bg-gray-50 rounded-lg"
             >
-              Sign In
+              <Play className="w-5 h-5 mr-2" />
+              {showDemo ? 'Hide Demo' : 'Try Demo'}
             </Button>
           </div>
         </div>
+
+        {/* Demo Section */}
+        {showDemo && (
+          <div className="mb-16 bg-white rounded-2xl shadow-xl p-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                <Sparkles className="w-8 h-8 text-red-600" />
+                Live Demo - Daily Checklist Feature
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Try out our interactive daily checklist feature that helps trainees track their progress
+              </p>
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <DailyChecklist />
+            </div>
+            <div className="mt-8 text-center">
+              <p className="text-sm text-gray-500 mb-4">
+                This is just one of many features available in our platform. Sign up to access everything!
+              </p>
+              <Button 
+                onClick={() => navigate("/register")}
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3"
+              >
+                Get Full Access Now
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
